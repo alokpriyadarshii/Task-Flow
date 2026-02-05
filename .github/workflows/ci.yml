@@ -54,6 +54,7 @@ jobs:
           done
 
       - run: pnpm --filter api prisma:deploy
+      - run: pnpm --filter api prisma:generate
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
