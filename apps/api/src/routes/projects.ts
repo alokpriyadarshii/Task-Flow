@@ -46,7 +46,7 @@ export const projectRoutes: FastifyPluginAsync = async (app) => {
         orderBy: { project: { updatedAt: 'desc' } },
       });
 
-      const projects = memberships.map((m) => ({
+      const projects = memberships.map((m: (typeof memberships)[number]) => ({
         id: m.project.id,
         name: m.project.name,
         description: m.project.description,
