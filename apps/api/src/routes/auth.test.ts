@@ -6,7 +6,7 @@ describe('auth', () => {
   const password = 'password123';
   const name = 'Test User';
 
-  let app: Awaited<ReturnType<typeof buildTestApp>>;
+  let app: Awaited<ReturnType<typeof buildTestApp>> | undefined;
 
   beforeAll(async () => {
     app = await buildTestApp();
@@ -14,11 +14,11 @@ describe('auth', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   it('registers and returns access token', async () => {
-    const res = await app.inject({
+    const res = await app!.inject({
       method: 'POST',
       url: '/auth/register',
       payload: { email, password, name },
@@ -32,7 +32,7 @@ describe('auth', () => {
   });
 
   it('logs in and returns access token', async () => {
-    const res = await app.inject({
+    const res = await app!.inject({
       method: 'POST',
       url: '/auth/login',
       payload: { email, password },
