@@ -1,0 +1,48 @@
+{
+  "name": "taskflow-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "format": "prettier -w .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "seed": "pnpm --filter api prisma:seed",
+    "dev:all": "docker compose up -d db && pnpm --filter api prisma:deploy && pnpm --filter api prisma:generate && turbo dev --parallel",
+    "prepare": "husky install",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d db"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "globals": "^17.3.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.3.0",
+    "prettier-plugin-tailwindcss": "^0.6.6",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.54.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.7"
+  },
+  "engines": {
+    "node": ">=20 <21",
+    "pnpm": ">=9 <10"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
+  }
+}
