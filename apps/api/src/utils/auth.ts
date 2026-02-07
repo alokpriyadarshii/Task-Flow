@@ -17,7 +17,13 @@ export function requireAuth(app: FastifyInstance) {
         }
       }
     } catch {
-      return reply.status(401).send({ error: 'Unauthorized' })
+      return reply.status(401).send({
+        ok: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Unauthorized',
+        },
+      })
     }
   }
 }
