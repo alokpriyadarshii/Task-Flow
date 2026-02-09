@@ -35,12 +35,17 @@ export default function DashboardPage() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const trimmedName = name.trim();
+  const trimmedDescription = description.trim();
 
   const createMutation = useMutation({
     mutationFn: () =>
       apiFetch<{ project: Project }>('/projects', {
         method: 'POST',
-        body: JSON.stringify({ name, description: description || null }),
+        body: JSON.stringify({
+          name: trimmedName,
+          description: trimmedDescription.length > 0 ? trimmedDescription : null,
+        }),
       }),
     onSuccess: async () => {
       setName('');
@@ -91,7 +96,7 @@ export default function DashboardPage() {
                 <label className="text-sm text-zinc-300">Description</label>
                 <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional" />
               </div>
-              <Button disabled={!name.trim() || createMutation.isPending} onClick={() => createMutation.mutate()}>
+              <Button disabled={trimmedName.length < 2 || createMutation.isPending} onClick={() => createMutation.mutate()}>
                 {createMutation.isPending ? 'Creating…' : 'Create'}
               </Button>
               {createMutation.error && (
