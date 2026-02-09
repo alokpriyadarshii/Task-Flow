@@ -60,12 +60,13 @@ export default function ProjectPage() {
   });
 
   const [title, setTitle] = useState('');
+  const trimmedTitle = title.trim();
 
   const createTask = useMutation({
     mutationFn: () =>
       apiFetch<{ task: Task }>(`/projects/${projectId}/tasks`, {
         method: 'POST',
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ title: trimmedTitle }),
       }),
     onSuccess: async () => {
       setTitle('');
@@ -124,7 +125,7 @@ export default function ProjectPage() {
           <CardContent>
             <div className="flex flex-wrap gap-3">
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title…" className="flex-1" />
-              <Button disabled={!title.trim() || createTask.isPending} onClick={() => createTask.mutate()}>
+              <Button disabled={trimmedTitle.length < 2 || createTask.isPending} onClick={() => createTask.mutate()}>
                 {createTask.isPending ? 'Adding…' : 'Add task'}
               </Button>
             </div>
