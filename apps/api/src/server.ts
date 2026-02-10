@@ -6,7 +6,12 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
-import { ZodTypeProvider, serializerCompiler, validatorCompiler, jsonSchemaTransform } from 'fastify-type-provider-zod';
+import {
+  ZodTypeProvider,
+  serializerCompiler,
+  validatorCompiler,
+  jsonSchemaTransform,
+} from 'fastify-type-provider-zod';
 import { type Env } from './config.js';
 import { prismaPlugin } from './plugins/prisma.js';
 import { authRoutes } from './routes/auth.js';
@@ -62,7 +67,7 @@ export async function buildApp({ env }: { env: Env }) {
 
   app.get('/', async () => ({ ok: true, name: 'TaskFlow API', docs: '/docs' }));
 
-app.get('/health', async () => ({ ok: true }));
+  app.get('/health', async () => ({ ok: true }));
 
   return app;
 }

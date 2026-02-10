@@ -11,7 +11,11 @@ export class AppError extends Error {
   }
 }
 
-export function errorHandler(err: FastifyError | AppError, _req: FastifyRequest, reply: FastifyReply) {
+export function errorHandler(
+  err: FastifyError | AppError,
+  _req: FastifyRequest,
+  reply: FastifyReply,
+) {
   const statusCode = (err as AppError).statusCode ?? err.statusCode ?? 500;
   const code = (err as AppError).code ?? 'INTERNAL_ERROR';
   const message = statusCode >= 500 ? 'Internal Server Error' : err.message;

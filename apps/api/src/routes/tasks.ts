@@ -187,7 +187,8 @@ export const taskRoutes: FastifyPluginAsync = async (app) => {
           title: body.title ?? undefined,
           description: body.description === undefined ? undefined : body.description,
           status: body.status ?? undefined,
-          dueDate: body.dueDate === undefined ? undefined : body.dueDate ? new Date(body.dueDate) : null,
+          dueDate:
+            body.dueDate === undefined ? undefined : body.dueDate ? new Date(body.dueDate) : null,
         },
       });
 
@@ -215,7 +216,9 @@ export const taskRoutes: FastifyPluginAsync = async (app) => {
       preHandler: requireAuth(app),
       schema: {
         params: z.object({ taskId: z.string().uuid() }),
-        response: { 200: z.object({ ok: z.literal(true), data: z.object({ message: z.string() }) }) },
+        response: {
+          200: z.object({ ok: z.literal(true), data: z.object({ message: z.string() }) }),
+        },
       },
     },
     async (req) => {

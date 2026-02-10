@@ -1,9 +1,15 @@
 import fp from 'fastify-plugin';
-import { PrismaClient } from '@prisma/client';
+import { createRequire } from 'module';
+import type { PrismaClient as PrismaClientType } from '@prisma/client';
+
+const require = createRequire(import.meta.url);
+const { PrismaClient } = require('@prisma/client') as {
+  PrismaClient: new (...args: any[]) => PrismaClientType;
+};
 
 declare module 'fastify' {
   interface FastifyInstance {
-    prisma: PrismaClient;
+    prisma: PrismaClientType;
   }
 }
 

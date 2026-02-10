@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckCircle2, LockKeyhole } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
@@ -17,6 +20,7 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+type User = { id: string; email: string; name: string; role: 'ADMIN' | 'USER' };
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,24 +35,47 @@ export default function LoginPage() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await apiFetch<{ user: any; accessToken: string }>('/auth/login', {
+      const data = await apiFetch<{ user: User; accessToken: string }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(values),
       });
       setAuth({ user: data.user, accessToken: data.accessToken });
+      toast.success('Signed in');
       router.push('/dashboard');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      setError('email', { message: e.message ?? 'Login failed' });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Login failed';
+      toast.error(message);
+      setError('email', { message });
     }
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl items-center px-6">
-      <Card className="w-full">
+    <main className="mx-auto grid min-h-screen max-w-5xl items-center gap-10 px-6 py-12 md:grid-cols-2">
+      <div className="space-y-5">
+        <Badge variant="info" className="gap-1">
+          <LockKeyhole className="h-3.5 w-3.5" />
+          Secure sign-in
+        </Badge>
+        <h1 className="text-4xl font-semibold leading-tight">
+          Welcome back to <span className="text-zinc-100">TaskFlow</span>
+        </h1>
+        <p className="max-w-md text-zinc-300">
+          Manage projects and tasks with a simple, fast UI. Your session stays safe with
+          refresh-token rotation.
+        </p>
+        <div className="space-y-2 text-sm text-zinc-300">
+          {['Clean dashboard', 'Projects & members', 'Task board workflow'].map((t) => (
+            <div key={t} className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-indigo-200" />
+              <span>{t}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Card className="animate-in fade-in zoom-in-95 w-full duration-300">
         <CardHeader>
-          <h1 className="text-2xl font-semibold">Login</h1>
+          <h2 className="text-2xl font-semibold">Sign in</h2>
           <p className="text-sm text-zinc-300">Use your account to access projects.</p>
         </CardHeader>
         <CardContent>
@@ -56,12 +83,16 @@ export default function LoginPage() {
             <div>
               <label className="text-sm text-zinc-300">Email</label>
               <Input placeholder="you@example.com" {...register('email')} />
-              {errors.email?.message && <p className="mt-1 text-sm text-red-300">{errors.email.message}</p>}
+              {errors.email?.message ? (
+                <p className="mt-1 text-sm text-red-300">{errors.email.message}</p>
+              ) : null}
             </div>
             <div>
               <label className="text-sm text-zinc-300">Password</label>
               <Input type="password" placeholder="••••••••" {...register('password')} />
-              {errors.password?.message && <p className="mt-1 text-sm text-red-300">{errors.password.message}</p>}
+              {errors.password?.message ? (
+                <p className="mt-1 text-sm text-red-300">{errors.password.message}</p>
+              ) : null}
             </div>
             <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Signing in…' : 'Sign in'}

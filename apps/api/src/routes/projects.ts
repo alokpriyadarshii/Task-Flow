@@ -192,7 +192,8 @@ export const projectRoutes: FastifyPluginAsync = async (app) => {
       });
 
       if (!membership) throw new AppError('FORBIDDEN', 'Not a member of this project', 403);
-      if (membership.role !== 'OWNER') throw new AppError('FORBIDDEN', 'Only owners can edit project', 403);
+      if (membership.role !== 'OWNER')
+        throw new AppError('FORBIDDEN', 'Only owners can edit project', 403);
 
       const body = req.body as any;
 
@@ -225,7 +226,9 @@ export const projectRoutes: FastifyPluginAsync = async (app) => {
       preHandler: requireAuth(app),
       schema: {
         params: z.object({ projectId: z.string().uuid() }),
-        response: { 200: z.object({ ok: z.literal(true), data: z.object({ message: z.string() }) }) },
+        response: {
+          200: z.object({ ok: z.literal(true), data: z.object({ message: z.string() }) }),
+        },
       },
     },
     async (req) => {
@@ -237,7 +240,8 @@ export const projectRoutes: FastifyPluginAsync = async (app) => {
       });
 
       if (!membership) throw new AppError('FORBIDDEN', 'Not a member of this project', 403);
-      if (membership.role !== 'OWNER') throw new AppError('FORBIDDEN', 'Only owners can delete project', 403);
+      if (membership.role !== 'OWNER')
+        throw new AppError('FORBIDDEN', 'Only owners can delete project', 403);
 
       await app.prisma.project.delete({ where: { id: projectId } });
 

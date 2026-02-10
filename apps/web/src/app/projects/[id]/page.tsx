@@ -1,11 +1,11 @@
 'use client';
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
 import { Input } from '../../../components/ui/input';
@@ -34,6 +34,15 @@ type Task = {
   dueDate?: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+const statusMeta: Record<
+  TaskStatus,
+  { label: string; badge: 'default' | 'info' | 'warning' | 'success' }
+> = {
+  TODO: { label: 'To do', badge: 'default' },
+  IN_PROGRESS: { label: 'In progress', badge: 'warning' },
+  DONE: { label: 'Done', badge: 'success' },
 };
 
 export default function ProjectPage() {
@@ -105,80 +114,121 @@ export default function ProjectPage() {
 
   const p = projectQuery.data?.project;
 
+  const errCreate = createTask.error instanceof Error ? createTask.error.message : null;
+
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">{p?.name ?? 'Project'}</h1>
-          <p className="text-sm text-zinc-300">{p?.description ?? 'Task board'}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold">{p?.name ?? 'Project'}</h1>
+            <Badge className="border-white/10 bg-white/5 text-zinc-200">
+              {p?.role ?? 'MEMBER'}
+            </Badge>
+          </div>
+          <p className="mt-1 text-sm text-zinc-300">{p?.description ?? 'Task board'}</p>
         </div>
-        <Link className="text-sm text-zinc-100 underline" href="/dashboard">
-          ← Back to dashboard
+        <Link
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 shadow-sm shadow-black/20 hover:bg-white/10"
+          href="/dashboard"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
         </Link>
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-3">
+      <div className="mt-8 grid gap-6">
+        <Card>
           <CardHeader>
             <div className="font-medium">Create task</div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title…" className="flex-1" />
-              <Button disabled={trimmedTitle.length < 2 || createTask.isPending} onClick={() => createTask.mutate()}>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Task title…"
+                className="flex-1"
+              />
+              <Button
+                disabled={trimmedTitle.length < 2 || createTask.isPending}
+                onClick={() => createTask.mutate()}
+              >
+                <Plus className="h-4 w-4" />
                 {createTask.isPending ? 'Adding…' : 'Add task'}
               </Button>
             </div>
-            {createTask.error && <p className="mt-2 text-sm text-red-300">{(createTask.error as any).message}</p>}
+            {errCreate ? <p className="mt-2 text-sm text-red-300">{errCreate}</p> : null}
           </CardContent>
         </Card>
 
-        {(['TODO', 'IN_PROGRESS', 'DONE'] as TaskStatus[]).map((status) => (
-          <Card key={status}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="font-medium">{status.replace('_', ' ')}</div>
-                <div className="text-sm text-zinc-400">{columns[status].length}</div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {columns[status].map((t) => (
-                  <div key={t.id} className="rounded-2xl border border-zinc-800 p-4">
-                    <div className="font-medium">{t.title}</div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {status !== 'TODO' && (
-                        <Button variant="secondary" onClick={() => updateTask.mutate({ taskId: t.id, status: 'TODO' })}>
-                          To do
-                        </Button>
-                      )}
-                      {status !== 'IN_PROGRESS' && (
-                        <Button
-                          variant="secondary"
-                          onClick={() => updateTask.mutate({ taskId: t.id, status: 'IN_PROGRESS' })}
-                        >
-                          In progress
-                        </Button>
-                      )}
-                      {status !== 'DONE' && (
-                        <Button variant="secondary" onClick={() => updateTask.mutate({ taskId: t.id, status: 'DONE' })}>
-                          Done
-                        </Button>
-                      )}
-                      <Button variant="ghost" onClick={() => deleteTask.mutate(t.id)}>
-                        Delete
-                      </Button>
+        <div className="grid gap-6 md:grid-cols-3">
+          {(['TODO', 'IN_PROGRESS', 'DONE'] as TaskStatus[]).map((status) => {
+            const meta = statusMeta[status];
+            return (
+              <Card key={status}>
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={meta.badge}>{meta.label}</Badge>
                     </div>
+                    <div className="text-sm text-zinc-400">{columns[status].length}</div>
                   </div>
-                ))}
-                {tasksQuery.isLoading ? <p className="text-sm text-zinc-300">Loading…</p> : null}
-                {!tasksQuery.isLoading && columns[status].length === 0 ? (
-                  <p className="text-sm text-zinc-500">No tasks.</p>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {columns[status].map((t) => (
+                      <div
+                        key={t.id}
+                        className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm shadow-black/20"
+                      >
+                        <div className="font-medium text-zinc-100">{t.title}</div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {status !== 'TODO' ? (
+                            <Button
+                              variant="secondary"
+                              onClick={() => updateTask.mutate({ taskId: t.id, status: 'TODO' })}
+                            >
+                              To do
+                            </Button>
+                          ) : null}
+                          {status !== 'IN_PROGRESS' ? (
+                            <Button
+                              variant="secondary"
+                              onClick={() =>
+                                updateTask.mutate({ taskId: t.id, status: 'IN_PROGRESS' })
+                              }
+                            >
+                              In progress
+                            </Button>
+                          ) : null}
+                          {status !== 'DONE' ? (
+                            <Button
+                              variant="secondary"
+                              onClick={() => updateTask.mutate({ taskId: t.id, status: 'DONE' })}
+                            >
+                              Done
+                            </Button>
+                          ) : null}
+                          <Button variant="ghost" onClick={() => deleteTask.mutate(t.id)}>
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {tasksQuery.isLoading ? (
+                      <p className="text-sm text-zinc-300">Loading…</p>
+                    ) : null}
+                    {!tasksQuery.isLoading && columns[status].length === 0 ? (
+                      <p className="text-sm text-zinc-500">No tasks.</p>
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </main>
   );

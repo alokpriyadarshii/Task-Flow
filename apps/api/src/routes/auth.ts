@@ -127,7 +127,10 @@ export const authRoutes: FastifyPluginAsync<{ env: Env }> = async (app, opts) =>
 
       return reply.send({
         ok: true,
-        data: { user: { id: user.id, name: user.name, email: user.email, role: user.role }, accessToken },
+        data: {
+          user: { id: user.id, name: user.name, email: user.email, role: user.role },
+          accessToken,
+        },
       });
     },
   );
@@ -170,7 +173,12 @@ export const authRoutes: FastifyPluginAsync<{ env: Env }> = async (app, opts) =>
       reply.setCookie('refresh_token', nextRefreshToken, cookieOptions(env));
 
       const accessToken = app.jwt.sign(
-        { sub: session.user.id, email: session.user.email, name: session.user.name, role: session.user.role },
+        {
+          sub: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          role: session.user.role,
+        },
         { expiresIn: '15m' },
       );
 

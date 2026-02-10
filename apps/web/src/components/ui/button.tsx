@@ -7,14 +7,14 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function Button({ className, variant = 'primary', ...props }: Props) {
   const base =
-    'inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-zinc-200/40 disabled:opacity-50 disabled:pointer-events-none';
+    'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/30 disabled:pointer-events-none disabled:opacity-50';
 
   const styles =
     variant === 'primary'
-      ? 'bg-zinc-100 text-zinc-900 hover:bg-white'
+      ? 'bg-gradient-to-b from-zinc-50 to-zinc-200 text-zinc-950 shadow-sm shadow-black/30 hover:from-white hover:to-zinc-100'
       : variant === 'secondary'
-        ? 'bg-zinc-800 hover:bg-zinc-700'
-        : 'bg-transparent hover:bg-zinc-900';
+        ? 'border border-white/10 bg-white/5 text-zinc-50 shadow-sm shadow-black/20 hover:bg-white/10'
+        : 'bg-transparent text-zinc-200 hover:bg-white/5';
 
   return <button className={cn(base, styles, className)} {...props} />;
 }
